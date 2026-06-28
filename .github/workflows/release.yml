@@ -63,8 +63,19 @@ jobs:
         run: |
           ZIP=$(ls artifacts/*.zip)
           DOWNLOAD_URL="https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v${{ steps.version.outputs.version }}/$(basename "$ZIP")"
+          jprm repo add --url="$DOWNLOAD_URL" manifest.json "$ZIP"
+
+      - name: Add image URL to manifest
+        run: |
           IMAGE_URL="https://raw.githubusercontent.com/KartoffelChipss/jellyfin-trailer-plugin/main/assets/icon.png"
-          jprm repo add --url="$DOWNLOAD_URL" --image-url="$IMAGE_URL" manifest.json "$ZIP"
+          python3 -c "
+          import json, sys
+          manifest = json.load(open('manifest.json'))
+          for plugin in manifest:
+              if plugin.get('guid') == 'fc250b1c-5cb4-4eae-a41b-8fb63b259959':
+                  plugin['imageUrl'] = sys.argv[1]
+          json.dump(manifest, open('manifest.json', 'w'), indent=2)
+          " "$IMAGE_URL"
 
       - name: Commit manifest to main
         run: |
