@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/KartoffelChipss/jellyfin-trailer-plugin/main/assets/icon.png",
     "versions": [
       {
+        "version": "1.0.2.0",
+        "changelog": "Initial release.\n",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v1.0.2.0/local-trailers_1.0.2.0.zip",
+        "checksum": "2b4e0a4b67a7bf9d919c551e89da046c",
+        "timestamp": "2026-06-28T15:03:30Z"
+      },
+      {
         "version": "1.0.1.0",
         "changelog": "Initial release.\n",
         "targetAbi": "10.11.0.0",
