@@ -63,7 +63,7 @@ jobs:
         run: |
           ZIP=$(ls artifacts/*.zip)
           DOWNLOAD_URL="https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v${{ steps.version.outputs.version }}/$(basename "$ZIP")"
-          jprm repo add --url="$DOWNLOAD_URL" manifest.json "$ZIP"
+          jprm repo add --url="$DOWNLOAD_URL" . "$ZIP"
 
       - name: Add image URL to manifest
         run: |
