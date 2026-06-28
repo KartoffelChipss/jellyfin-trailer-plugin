@@ -6,7 +6,16 @@
     "overview": "Downloads YouTube trailers as local files next to your media.",
     "owner": "KartoffelChipss",
     "category": "General",
+    "imageUrl": "https://raw.githubusercontent.com/KartoffelChipss/jellyfin-trailer-plugin/main/assets/icon.png",
     "versions": [
+      {
+        "version": "1.0.1.0",
+        "changelog": "Initial release.\n",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v1.0.1.0/local-trailers/local-trailers_1.0.1.0.zip",
+        "checksum": "c215429851284c0bfc5a64827ce1b9e6",
+        "timestamp": "2026-06-28T14:59:46Z"
+      },
       {
         "version": "1.0.0.0",
         "changelog": "Initial release.\n",
@@ -15,7 +24,6 @@
         "checksum": "e8c3bd7016168b6c8aed7b7145cd0b5f",
         "timestamp": "2026-06-28T14:22:54Z"
       }
-    ],
-    "imageUrl": "https://raw.githubusercontent.com/KartoffelChipss/jellyfin-trailer-plugin/main/assets/icon.png"
+    ]
   }
 ]
