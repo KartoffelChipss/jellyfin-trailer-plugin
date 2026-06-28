@@ -30,7 +30,7 @@ tasks:
                 cat > {{.PLUGIN_DIR}}/meta.json <<'EOF'
                 {
                   "category": "General",
-                  "guid": "b2f7e4a1-8c3d-4e5f-9a1b-6d2c8e0f3a7b",
+                  "guid": "fc250b1c-5cb4-4eae-a41b-8fb63b259959",
                   "name": "Local Trailers",
                   "description": "Downloads YouTube trailers as local files next to your media.",
                   "owner": "jan",
