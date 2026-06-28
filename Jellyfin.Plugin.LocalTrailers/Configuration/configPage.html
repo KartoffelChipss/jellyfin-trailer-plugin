@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Local Trailers</title>
+    </head>
+    <body>
+        <div
+            id="LocalTrailersConfigPage"
+            data-role="page"
+            class="page type-interior pluginConfigurationPage"
+            data-require="emby-input,emby-button,emby-checkbox,emby-select"
+        >
+            <div data-role="content">
+                <div class="content-primary">
+                    <form id="LocalTrailersConfigForm">
+                        <div class="verticalSection">
+                            <h2 class="sectionTitle">Local Trailers</h2>
+                            <p class="fieldDescription">
+                                Downloads YouTube trailers to disk as local
+                                <code>-trailer.mp4</code> files in a <code>trailers/</code> folder
+                                next to each media item, so every Jellyfin client can play them
+                                natively.
+                            </p>
+                        </div>
+
+                        <!-- Enable -->
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnabled" />
+                                <span>Enable trailer downloads</span>
+                            </label>
+                        </div>
+
+                        <!-- yt-dlp management -->
+                        <div class="verticalSection">
+                            <h2 class="sectionTitle">yt-dlp</h2>
+
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label>
+                                    <input type="checkbox" is="emby-checkbox" id="chkManageYtDlp" />
+                                    <span>Manage yt-dlp automatically</span>
+                                </label>
+                                <div class="fieldDescription">
+                                    Download and maintain the yt-dlp binary automatically. Detected
+                                    version: <strong id="ytdlpVersion">…</strong>
+                                </div>
+                            </div>
+
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtYtDlpPath"
+                                    >yt-dlp path (optional override)</label
+                                >
+                                <input type="text" id="txtYtDlpPath" is="emby-input" />
+                                <div class="fieldDescription">
+                                    Leave blank to use the managed binary.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ffmpeg -->
+                        <div class="verticalSection">
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtFfmpegPath"
+                                    >ffmpeg path (optional override)</label
+                                >
+                                <input type="text" id="txtFfmpegPath" is="emby-input" />
+                                <div class="fieldDescription">
+                                    Leave blank to use the Jellyfin-bundled ffmpeg (used by yt-dlp
+                                    for merging formats).
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download settings -->
+                        <div class="verticalSection">
+                            <h2 class="sectionTitle">Download settings</h2>
+
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtFormatSelector"
+                                    >Format selector</label
+                                >
+                                <input type="text" id="txtFormatSelector" is="emby-input" />
+                                <div class="fieldDescription">
+                                    yt-dlp format selector. Default picks up to 1080p H.264+AAC.
+                                </div>
+                            </div>
+
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtProxy">Proxy (optional)</label>
+                                <input type="text" id="txtProxy" is="emby-input" />
+                                <div class="fieldDescription">
+                                    HTTP/SOCKS5 proxy for yt-dlp (e.g.
+                                    <code>socks5://127.0.0.1:1080</code>).
+                                </div>
+                            </div>
+
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="txtExtraArgs"
+                                    >Extra yt-dlp arguments</label
+                                >
+                                <input type="text" id="txtExtraArgs" is="emby-input" />
+                                <div class="fieldDescription">
+                                    Space-separated extra arguments passed to yt-dlp (e.g.
+                                    <code>--cookies /path/to/cookies.txt</code>).
+                                </div>
+                            </div>
+
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="numTimeout"
+                                    >Download timeout (seconds)</label
+                                >
+                                <input
+                                    type="number"
+                                    id="numTimeout"
+                                    is="emby-input"
+                                    min="10"
+                                    max="600"
+                                    step="10"
+                                />
+                            </div>
+
+                            <div class="inputContainer">
+                                <label class="inputLabel" for="numConcurrent"
+                                    >Max concurrent downloads</label
+                                >
+                                <input
+                                    type="number"
+                                    id="numConcurrent"
+                                    is="emby-input"
+                                    min="1"
+                                    max="8"
+                                    step="1"
+                                />
+                                <div class="fieldDescription">
+                                    How many trailers to download in parallel during the scheduled
+                                    task.
+                                </div>
+                            </div>
+
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label>
+                                    <input type="checkbox" is="emby-checkbox" id="chkOverwrite" />
+                                    <span>Re-download existing trailers</span>
+                                </label>
+                                <div class="fieldDescription">
+                                    When enabled, trailers that have already been downloaded will be
+                                    re-downloaded.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="verticalSection">
+                            <h2 class="sectionTitle">Actions</h2>
+                            <div style="display: flex; gap: 0.5em; flex-wrap: wrap">
+                                <button
+                                    is="emby-button"
+                                    type="button"
+                                    id="btnUpdateYtDlp"
+                                    class="raised button-submit"
+                                >
+                                    Update yt-dlp
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button
+                                is="emby-button"
+                                type="submit"
+                                class="raised button-submit block"
+                            >
+                                <span>Save</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+                var pluginId = 'b2f7e4a1-8c3d-4e5f-9a1b-6d2c8e0f3a7b';
+
+                function loadConfig() {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (cfg) {
+                        document.getElementById('chkEnabled').checked = cfg.Enabled;
+                        document.getElementById('chkManageYtDlp').checked = cfg.ManageYtDlp;
+                        document.getElementById('txtYtDlpPath').value = cfg.YtDlpPath || '';
+                        document.getElementById('txtFfmpegPath').value = cfg.FfmpegPath || '';
+                        document.getElementById('txtFormatSelector').value =
+                            cfg.FormatSelector || '';
+                        document.getElementById('txtProxy').value = cfg.Proxy || '';
+                        document.getElementById('txtExtraArgs').value = cfg.YtDlpArguments || '';
+                        document.getElementById('numTimeout').value = cfg.ResolveTimeoutSeconds;
+                        document.getElementById('numConcurrent').value = cfg.MaxConcurrentDownloads;
+                        document.getElementById('chkOverwrite').checked = cfg.OverwriteExisting;
+                        Dashboard.hideLoadingMsg();
+                    });
+                }
+
+                function saveConfig() {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (cfg) {
+                        cfg.Enabled = document.getElementById('chkEnabled').checked;
+                        cfg.ManageYtDlp = document.getElementById('chkManageYtDlp').checked;
+                        cfg.YtDlpPath = document.getElementById('txtYtDlpPath').value.trim();
+                        cfg.FfmpegPath = document.getElementById('txtFfmpegPath').value.trim();
+                        cfg.FormatSelector = document
+                            .getElementById('txtFormatSelector')
+                            .value.trim();
+                        cfg.Proxy = document.getElementById('txtProxy').value.trim();
+                        cfg.YtDlpArguments = document.getElementById('txtExtraArgs').value.trim();
+                        cfg.ResolveTimeoutSeconds =
+                            parseInt(document.getElementById('numTimeout').value, 10) || 120;
+                        cfg.MaxConcurrentDownloads =
+                            parseInt(document.getElementById('numConcurrent').value, 10) || 2;
+                        cfg.OverwriteExisting = document.getElementById('chkOverwrite').checked;
+
+                        ApiClient.updatePluginConfiguration(pluginId, cfg).then(function () {
+                            Dashboard.processPluginConfigurationUpdateResult();
+                        });
+                    });
+                }
+
+                document
+                    .querySelector('#LocalTrailersConfigPage')
+                    .addEventListener('pageshow', loadConfig);
+
+                document
+                    .getElementById('LocalTrailersConfigForm')
+                    .addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        saveConfig();
+                        return false;
+                    });
+
+                document.getElementById('btnUpdateYtDlp').addEventListener('click', function () {
+                    var btn = this;
+                    btn.disabled = true;
+                    btn.textContent = 'Downloading…';
+                    ApiClient.ajax({
+                        type: 'POST',
+                        url: ApiClient.getUrl('LocalTrailers/admin/ytdlp/update'),
+                    })
+                        .then(function (resp) {
+                            return resp.text ? resp.text() : resp;
+                        })
+                        .then(function (msg) {
+                            btn.disabled = false;
+                            btn.textContent = 'Update yt-dlp';
+                            Dashboard.alert(msg || 'Done');
+                        })
+                        .catch(function () {
+                            btn.disabled = false;
+                            btn.textContent = 'Update yt-dlp';
+                            Dashboard.alert('Update failed — check the server log.');
+                        });
+                });
+            </script>
+        </div>
+    </body>
+</html>

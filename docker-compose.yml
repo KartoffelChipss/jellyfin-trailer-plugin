@@ -1,0 +1,19 @@
+services:
+    jellyfin:
+        image: jellyfin/jellyfin:10.11.11
+        container_name: jellyfin-dev
+        ports:
+            - '8096:8096'
+        volumes:
+            - jellyfin-config:/config
+            - jellyfin-cache:/cache
+            - ./media:/media
+            - /Users/jan/Documents/movies:/mymovies
+            - ./dev/plugin:/config/plugins/LocalTrailers
+        environment:
+            - JELLYFIN_PublishedServerUrl=http://localhost:8096
+        restart: unless-stopped
+
+volumes:
+    jellyfin-config:
+    jellyfin-cache:

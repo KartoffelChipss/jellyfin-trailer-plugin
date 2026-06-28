@@ -1,0 +1,80 @@
+version: '3'
+
+vars:
+    PROJECT: Jellyfin.Plugin.LocalTrailers
+    PLUGIN_DIR: dev/plugin
+    MEDIA_DIR: media/movies
+
+tasks:
+    default:
+        desc: Build the plugin and start Jellyfin
+        cmds:
+            - task: up
+
+    build:
+        desc: Build the plugin in Release mode
+        cmds:
+            - dotnet publish {{.PROJECT}}/{{.PROJECT}}.csproj -c Release --nologo
+        sources:
+            - '{{.PROJECT}}/**/*.cs'
+            - '{{.PROJECT}}/**/*.csproj'
+            - '{{.PROJECT}}/**/*.html'
+
+    stage:
+        desc: Copy plugin DLL and meta.json into the dev staging directory
+        deps: [build]
+        cmds:
+            - mkdir -p {{.PLUGIN_DIR}}
+            - cp {{.PROJECT}}/bin/Release/net9.0/{{.PROJECT}}.dll {{.PLUGIN_DIR}}/
+            - |
+                cat > {{.PLUGIN_DIR}}/meta.json <<'EOF'
+                {
+                  "category": "General",
+                  "guid": "b2f7e4a1-8c3d-4e5f-9a1b-6d2c8e0f3a7b",
+                  "name": "Local Trailers",
+                  "description": "Downloads YouTube trailers as local files next to your media.",
+                  "owner": "jan",
+                  "overview": "Downloads YouTube trailers as local files next to your media.",
+                  "versions": [
+                    {
+                      "version": "1.0.0.0",
+                      "changelog": "Initial release.",
+                      "targetAbi": "10.11.0.0",
+                      "timestamp": "2024-01-01T00:00:00Z"
+                    }
+                  ]
+                }
+                EOF
+
+    up:
+        desc: Build plugin, stage it, and start Jellyfin
+        deps: [stage]
+        cmds:
+            - docker compose up -d
+            - echo ""
+            - echo "Jellyfin is starting at http://localhost:8096"
+            - echo "Plugin 'Local Trailers' is mounted from dev/plugin/"
+
+    down:
+        desc: Stop Jellyfin
+        cmds:
+            - docker compose down
+
+    restart:
+        desc: Rebuild plugin and restart Jellyfin to pick up changes
+        deps: [stage]
+        cmds:
+            - docker compose restart jellyfin
+            - echo "Jellyfin restarting with updated plugin..."
+
+    logs:
+        desc: Tail Jellyfin container logs
+        cmds:
+            - docker compose logs -f jellyfin
+
+    clean:
+        desc: Stop Jellyfin, remove volumes and dev artifacts
+        cmds:
+            - docker compose down -v
+            - rm -rf dev/plugin
+            - echo "Cleaned up containers, volumes, and staged plugin"
