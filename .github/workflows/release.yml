@@ -1,0 +1,79 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install jprm
+        run: pip install jprm
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          echo "version=${TAG}" >> "$GITHUB_OUTPUT"
+
+          # Patch build.yaml with the tag version
+          sed -i "s/^version: .*/version: ${TAG}/" Jellyfin.Plugin.LocalTrailers/build.yaml
+
+          # Use the annotated tag message as changelog, fall back to build.yaml default
+          CHANGELOG=$(git tag -l --format='%(contents:body)' "v${TAG}" | head -20)
+          if [ -n "$CHANGELOG" ]; then
+            # Replace the changelog block in build.yaml
+            python3 -c "
+          import re, sys
+          text = open('Jellyfin.Plugin.LocalTrailers/build.yaml').read()
+          changelog = sys.argv[1].strip()
+          indented = '\n'.join('  ' + line for line in changelog.splitlines())
+          text = re.sub(r'changelog: \|.*?(?=\n\w|\Z)', f'changelog: |\n{indented}\n', text, flags=re.DOTALL)
+          open('Jellyfin.Plugin.LocalTrailers/build.yaml', 'w').write(text)
+          " "$CHANGELOG"
+          fi
+
+      - name: Build plugin
+        run: jprm plugin build Jellyfin.Plugin.LocalTrailers --output=artifacts
+
+      - name: Update manifest
+        run: |
+          ZIP=$(ls artifacts/*.zip)
+          DOWNLOAD_URL="https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v${{ steps.version.outputs.version }}/$(basename "$ZIP")"
+          jprm repo add --url="$DOWNLOAD_URL" manifest.json "$ZIP"
+
+      - name: Commit manifest to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git add manifest.json
+          git diff --cached --quiet && echo "No manifest changes" || git commit -m "Update manifest for v${{ steps.version.outputs.version }}"
+          git push origin main
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          generate_release_notes: true
