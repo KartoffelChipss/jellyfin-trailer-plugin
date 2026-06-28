@@ -61,7 +61,8 @@ jobs:
         run: |
           ZIP=$(ls artifacts/*.zip)
           DOWNLOAD_URL="https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v${{ steps.version.outputs.version }}/$(basename "$ZIP")"
-          jprm repo add --url="$DOWNLOAD_URL" manifest.json "$ZIP"
+          IMAGE_URL="https://raw.githubusercontent.com/KartoffelChipss/jellyfin-trailer-plugin/main/assets/icon.png"
+          jprm repo add --url="$DOWNLOAD_URL" --image-url="$IMAGE_URL" manifest.json "$ZIP"
 
       - name: Commit manifest to main
         run: |
