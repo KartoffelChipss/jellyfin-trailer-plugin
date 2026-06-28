@@ -55,7 +55,9 @@ jobs:
           fi
 
       - name: Build plugin
-        run: jprm plugin build Jellyfin.Plugin.LocalTrailers --output=artifacts
+        run: |
+          mkdir -p artifacts
+          jprm plugin build Jellyfin.Plugin.LocalTrailers --output=artifacts
 
       - name: Update manifest
         run: |
