@@ -62,8 +62,8 @@ jobs:
       - name: Update manifest
         run: |
           ZIP=$(ls artifacts/*.zip)
-          BASE_URL="https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v${{ steps.version.outputs.version }}"
-          jprm repo add --url="$BASE_URL" . "$ZIP"
+          PLUGIN_URL="https://github.com/KartoffelChipss/jellyfin-trailer-plugin/releases/download/v${{ steps.version.outputs.version }}/$(basename "$ZIP")"
+          jprm repo add --plugin-url="$PLUGIN_URL" . "$ZIP"
 
       - name: Add image URL to manifest
         run: |
